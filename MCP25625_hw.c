@@ -270,6 +270,7 @@ void mcp25625_hw_rx_status
 )
 {
     MCP25625_hal_cs( 0 );
+    printf("rx_status");
     MCP25625_hal_cmd( CMD_RX_STAT );
     MCP25625_hal_read( ( uint8_t* )status, 1 );
     MCP25625_hal_cs( 1 );
@@ -300,7 +301,10 @@ int mcp25625_hw_ctl_update
 {
     if( *( ( uint8_t* )value + 1 ) != 0x30 )
     {
+	    printf("updates\n");
+	    
         memcpy( ( void* )&reg, value, sizeof( reg_t ) );
+	    printf("size : %d \n", sizeof(reg_t));
         hw_modify( reg.address, reg.mask, &reg.value );
     }
     else {

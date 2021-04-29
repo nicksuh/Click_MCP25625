@@ -1210,6 +1210,7 @@ typedef struct {
     int_status_t    icod        : 3;
     uint8_t                     : 1;
     can_opmode_t    opmod       : 3;
+    mcp25625_stat 	reg;
 
 } mcp25625_can_stat;
 

@@ -198,24 +198,24 @@ int mcp25625_init
         return MCP25625_CTL_ERR;
 
     // Activate RTS pins ( TX0, TX1 )
-    rts_pins.p0_mode    = true;
-    rts_pins.p1_mode    = true;
+    rts_pins.p0_mode    = false;
+    rts_pins.p1_mode    = false;
     rts_pins.p2_mode    = false;
 
     if( mcp25625_hw_ctl_set( ( void* )&rts_pins ) )
         return MCP25625_RTS_ERR;
 
     // Activate RX pins ( RX0, RX1 )
-    rx_pins.p0_mode = true;
-    rx_pins.p0_enab = true;
-    rx_pins.p1_mode = true;
-    rx_pins.p1_enab = true;
+    rx_pins.p0_mode = false;
+    rx_pins.p0_enab = false;
+    rx_pins.p1_mode = false;
+    rx_pins.p1_enab = false;
 
     if( mcp25625_hw_ctl_set( ( void* )&rx_pins ) )
         return MCP25625_RXP_ERR;
 
     // Configure TXB registers( same cofig for all txb regs )
-    tx_ctl.txp      = 2;
+    tx_ctl.txp      = 2; //2 is highest
     tx_ctl.txreq    = false;
     tx_ctl.buffer   = TXB0;
     if( mcp25625_hw_ctl_set( &tx_ctl ) )
@@ -251,14 +251,14 @@ int mcp25625_init
         return MCP25625_CTL_ERR;
 
     // Enable interrupts
-    ie_ctl.err     = true;
-    ie_ctl.mask    = true;
-    ie_ctl.merre   = true;
+    ie_ctl.err     = false;
+    ie_ctl.mask    = false;
+    ie_ctl.merre   = false;
     ie_ctl.rx0     = false;
     ie_ctl.rx1     = false;
-    ie_ctl.tx0     = true;
-    ie_ctl.tx1     = true;
-    ie_ctl.tx2     = true;
+    ie_ctl.tx0     = false;
+    ie_ctl.tx1     = false;
+    ie_ctl.tx2     = false;
     ie_ctl.wak     = false;
     ie_ctl.reg     = INT_CTL;
     if( mcp25625_hw_ctl_set( ( void* )&ie_ctl ) )
@@ -278,11 +278,21 @@ int mcp25625_mode
     can_ctl.reqop = mode;
     can_ctl.mask = CAN_REQOP;
 
-    mcp25625_hw_ctl_update( ( void* )&can_ctl );
+    if(mode == 0) printf("normal mode setting start \n");
+    if(mode == 1) printf("sleep mode setting start \n");
+    if(mode == 2) printf("loopback mode setting start \n");
+    if(mode == 3) printf("listen-only mode setting start \n");
+    if(mode == 4) printf("configuration mode setting start \n");
 
-    if( mcp25625_hw_ctl_get( ( void* )&can_stat ) )
+    mcp25625_hw_ctl_update( ( void* )&can_ctl );
+    can_stat.reg = STAT_CAN;
+
+    if( mcp25625_hw_ctl_get( ( void* )&can_stat) )
         if( can_stat.opmod != mode )
-            return MCP25625_CTL_ERR;
+	{
+		printf("mode setting error, not coherent \n" );
+            	return MCP25625_CTL_ERR;
+	}
 
     return MCP25625_OK;
 }
@@ -497,6 +507,8 @@ int mcp25625_msg_load
     tx_ctl.txreq = false;
     tx_ctl.mask = TXB_TXREQ;
 
+    
+
     if( mcp25625_mode( OPMODE_CONFIG ) )
         return MCP25625_MODE_FAULT;
 
@@ -606,27 +618,40 @@ int mcp25625_msg_read
 }
 
 
-uint8_t tx_test[10] = { 'M', 'S', 'G', '\0' };
+uint8_t tx_test[10] = { 'M','\0' };
 uint8_t rx_test[10] = {0};
 uint32_t EID = 0;
 bool RX_IDE, RX_RTR;
 int main() {
-	mcp25625_init(OPMODE_NORMAL);
-	printf("normal mode \n ");
-	
-    	ie_ctl.reg     = INT_CTL;
-    	mcp25625_hw_ctl_get( ( void* )&ie_ctl );
+	mcp25625_init(OPMODE_LOOP);
+	printf("\n \n normal mode \n ");
+	printf("size : %d \n" ,sizeof(mcp25625_can_ctl));
+			
+
+    	//ie_ctl.reg     = INT_CTL;
+	//
+    	//mcp25625_hw_ctl_get( ( void* )&ie_ctl );
 
 
-	mcp25625_msg_load(TXB0,tx_test,4,EID,true,false);
+	printf("\n\ntx read = %02X \n", tx_test[0]);
+	printf("rx read = %02X \n", rx_test[0]);
+	mcp25625_msg_load(TXB0,tx_test,2,EID,true,false);
 	mcp25625_msg_send(TXB0);
+
+
 	sleep(3);
 
 	while(!mcp25625_msg_ready(RXB0)){
-		
-		printf("not read\n");
-	}
-	//printf("read succ");
+			printf("not ready");
+
+			sleep(1);
+			}
+	printf("message ready done\n");
+	uint8_t numc = 0;
+
+	mcp25625_msg_read(RXB0,rx_test,&numc,&EID,&RX_IDE,&RX_RTR);
+	printf("rx read = %02X \n", rx_test[0]);
+
 	
 		
 
