@@ -214,12 +214,8 @@ int mcp25625_pin_reset
         void
 )
 {
-    MCP25625_hal_rst( 1 );
-    Delay_ms( 10 );
-    MCP25625_hal_rst( 0 );
-    Delay_ms( 10 );
-    MCP25625_hal_rst( 1 );
-    Delay_ms( 10 );
+
+	mcp25625_hw_reset();
 
     return 0;
 }
