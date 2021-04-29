@@ -19,10 +19,9 @@
 * Includes
 *******************************************************************************/
 #include "MCP25625_hal.h"
-
-
-
 #include <pigpio.h>
+#include <stdio.h>
+
 /******************************************************************************
 * Module Preprocessor Constants
 *******************************************************************************/
@@ -39,7 +38,11 @@
 * Module Variable Definitions
 *******************************************************************************/
 
+void write_spi_p(uint8_t data);
+uint8_t read_spi_p();
 
+
+int myspi ;
 
 /******************************************************************************
 * Function Prototypes
@@ -50,22 +53,28 @@
 *******************************************************************************/
 void MCP25625_hal_cs( int state )
 {
+
 }
 
 void MCP25625_hal_rst( int state )
 {
+
 }
 
 void MCP25625_hal_stb( int state )
 {
+
 }
 
 void MCP25625_hal_tx0( int state )
 {
+	//CE0
+
 }
 
 void MCP25625_hal_tx1( int state )
 {
+
 }
 
 int MCP25625_hal_rx0()
@@ -79,28 +88,57 @@ int MCP25625_hal_rx1()
 void MCP25625_hal_init()
 {
 
+	gpioInitialise();
+	myspi = spiOpen(0,3000000,32);
 }
 
 void MCP25625_hal_cmd( uint8_t cmd )
 {
-    write_spi_p( cmd );
+   	write_spi_p( cmd );
 }
 
 void MCP25625_hal_write( uint8_t *buffer,
                          uint16_t count )
 {
-    while( count-- )
-        write_spi_p( *buffer++ );
+    	while( count-- )
+        	write_spi_p( *buffer++ );
 }
 
 void MCP25625_hal_read( uint8_t *buffer,
                         uint16_t count )
 {
-    while( count-- )
-        *buffer++ = read_spi_p( DUMMY_BYTE );
+	while( count-- )
+        	*buffer++ = read_spi_p();
+}
+
+uint8_t read_spi_p(){
+	uint8_t buf;
+	spiRead(myspi,&buf,1);
+	return buf;
+}
+
+
+void write_spi_p(uint8_t data){
+	spiRead(myspi,&data,1);
+
+
 }
 
 int main() {
-	gpioInitialise
+	MCP25625_hal_init();
+
+
+
 }
+
+
 /*************** END OF FUNCTIONS ***************************************************************************/
+/*
+
+	uint8_t a = 0x32;
+	uint8_t b = 0x00;
+	
+	spiXfer(myspi,&a,&b,2);
+	printf(" test : %02X " ,b);
+
+*/
