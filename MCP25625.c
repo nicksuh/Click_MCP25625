@@ -255,7 +255,7 @@ int mcp25625_init
     ie_ctl.mask    = true;
     ie_ctl.merre   = true;
     ie_ctl.rx0     = false;
-    ie_ctl.rx1     = true;
+    ie_ctl.rx1     = false;
     ie_ctl.tx0     = true;
     ie_ctl.tx1     = true;
     ie_ctl.tx2     = true;
@@ -613,21 +613,19 @@ bool RX_IDE, RX_RTR;
 int main() {
 	mcp25625_init(OPMODE_NORMAL);
 	printf("normal mode \n ");
-	write_spi_p(0xA0);
-	read_spi_p();
 	
     	ie_ctl.reg     = INT_CTL;
     	mcp25625_hw_ctl_get( ( void* )&ie_ctl );
 
 
-	//mcp25625_msg_load(TXB0,tx_test,4,EID,true,false);
-	//mcp25625_msg_send(TXB0);
-	sleep(1);
+	mcp25625_msg_load(TXB0,tx_test,4,EID,true,false);
+	mcp25625_msg_send(TXB0);
+	sleep(3);
 
-	//while(!mcp25625_msg_ready(RXB0)){
-		//printf("not read\n");
-		sleep(1);
-	//}
+	while(!mcp25625_msg_ready(RXB0)){
+		
+		printf("not read\n");
+	}
 	//printf("read succ");
 	
 		
