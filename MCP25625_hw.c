@@ -22,6 +22,7 @@
 *******************************************************************************/
 
 #include "MCP25625_hw.h"
+#include <unistd.h>
 
 /******************************************************************************
 * Module Preprocessor Constants
@@ -201,10 +202,15 @@ int mcp25625_hw_init
     reg.address = 0;
     reg.value = 0;
 
+    sleep(0.1);
     MCP25625_hal_init();
+    sleep(0.1);
     mcp25625_pin_reset();
+    sleep(0.1);
     MCP25625_hal_cs( 1 );
+    sleep(0.1);
     MCP25625_hal_stb( 0 );
+    sleep(0.1);
 
     return 0;
 }

@@ -64,6 +64,7 @@ void MCP25625_hal_rst( int state )
 
 void MCP25625_hal_stb( int state )
 {
+	gpioWrite(27,state);
 
 }
 
@@ -88,15 +89,19 @@ int MCP25625_hal_rx1()
 
 void MCP25625_hal_init()
 {
-
 	gpioInitialise();
-	myspi = spiOpen(0,3000000,32);
+	myspi = spiOpen(0,100000,32);
+	int retva = gpioHardwareClock(4,19200000);
+	printf("clock %d",retva);
+	
 	gpioSetMode(8,PI_OUTPUT);
-	gpioHardwareClock(0,20000000);
+	gpioSetMode(27,PI_OUTPUT);
+	
 }
 
 void MCP25625_hal_cmd( uint8_t cmd )
 {
+	printf("com \n");
    	write_spi_p( cmd );
 }
 
@@ -115,23 +120,19 @@ void MCP25625_hal_read( uint8_t *buffer,
 }
 
 uint8_t read_spi_p(){
-	uint8_t buf;
+	uint8_t buf = 0x00;
 	spiRead(myspi,&buf,1);
-	printf("R : %02X \n " ,buf);
+	printf("R : %02X \n" ,buf);
 	return buf;
 }
 
 
 void write_spi_p(uint8_t data){
+	printf("W : %02X \n" ,data);
 	spiRead(myspi,&data,1);
-	printf("W : %02X \n " ,data);
-
 }
 
 
-int main() {
-	MCP25625_hal_init();
-}
 
 /*************** END OF FUNCTIONS ***************************************************************************/
 /*

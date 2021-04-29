@@ -24,6 +24,10 @@
 *******************************************************************************/
 
 #include "MCP25625.h"
+#include "MCP25625_hal.h"
+
+#include <unistd.h>
+#include <stdio.h>
 
 /******************************************************************************
 * Module Preprocessor Constants
@@ -250,7 +254,7 @@ int mcp25625_init
     ie_ctl.err     = true;
     ie_ctl.mask    = true;
     ie_ctl.merre   = true;
-    ie_ctl.rx0     = true;
+    ie_ctl.rx0     = false;
     ie_ctl.rx1     = true;
     ie_ctl.tx0     = true;
     ie_ctl.tx1     = true;
@@ -599,6 +603,35 @@ int mcp25625_msg_read
         return MCP25625_CTL_ERR;
 
     return MCP25625_OK;
+}
+
+
+uint8_t tx_test[10] = { 'M', 'S', 'G', '\0' };
+uint8_t rx_test[10] = {0};
+uint32_t EID = 0;
+bool RX_IDE, RX_RTR;
+int main() {
+	mcp25625_init(OPMODE_NORMAL);
+	printf("normal mode \n ");
+	write_spi_p(0xA0);
+	read_spi_p();
+	
+    	ie_ctl.reg     = INT_CTL;
+    	mcp25625_hw_ctl_get( ( void* )&ie_ctl );
+
+
+	//mcp25625_msg_load(TXB0,tx_test,4,EID,true,false);
+	//mcp25625_msg_send(TXB0);
+	sleep(1);
+
+	//while(!mcp25625_msg_ready(RXB0)){
+		//printf("not read\n");
+		sleep(1);
+	//}
+	//printf("read succ");
+	
+		
+
 }
 
 /*************** END OF FUNCTIONS *********************************************/
